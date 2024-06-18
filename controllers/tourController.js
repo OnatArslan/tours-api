@@ -23,7 +23,7 @@ exports.getAllTours = async (req, res) => {
 exports.getTour = async (req, res) => {
   try {
     const id = req.params.id; // This is not neccesary but good for increaseing understand code readabilty
-    const tour = await Tour.findById(id);
+    const tour = await Tour.findById(id); // findById can take 3 params (id, project, options)
     // const tour = await Tour.findOne({ _id: req.params.id });
     res.status(200).json({
       status: 'success',
@@ -41,12 +41,10 @@ exports.getTour = async (req, res) => {
 
 exports.createTour = async (req, res) => {
   try {
-    const newTour = await Tour.create({
-      name: req.body.name,
-      rating: req.body.rating,
-      price: req.body.price
-      // create() method can take options paramter for validateBeforeSave etc options
-    });
+    const newTour = await Tour.create(
+      req.body
+      // mongoose create() method can take options argument as a 2.
+    );
 
     res.status(201).json({
       status: 'success',
@@ -63,18 +61,54 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: '<Updated tour here...>'
-    }
-  });
+exports.updateTour = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const updatedTour = await Tour.findByIdAndUpdate(id, req.body, {
+      runValidators: true,
+      new: true
+    });
+    // This is normal query system for mongoose but upper code is more elegant
+    // const updatedTour = await Tour.findOneAndUpdate({ _id: id }, req.body, {
+    //   runValidators: true,
+    //   new: true
+    // });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: updatedTour
+      }
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: `fail`,
+      message: err
+    });
+  }
 };
 
-exports.deleteTour = (req, res) => {
-  res.status(204).json({
-    status: 'success',
-    data: null
-  });
+exports.deleteTour = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const tour = await Tour.findByIdAndDelete(id);
+
+    if (!tour) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'No tour found with that ID'
+      });
+    }
+
+    res.status(204).json({
+      // status(204) won`t show message or data if this is important use status(200)
+      status: 'success',
+      data: null
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err.message // It's often helpful to return the error message for debugging purposes.
+    });
+  }
 };
