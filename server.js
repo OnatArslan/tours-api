@@ -12,6 +12,9 @@ mongoose
   .then(conObj => {
     // console.log(conObj.connections); this is for reading database info
     console.log(`DATABASE CONNECTED SUCCESFULY`);
+  })
+  .catch(err => {
+    console.log(err);
   });
 
 // LOCAL DATABASE connection below
