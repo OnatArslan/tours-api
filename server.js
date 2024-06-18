@@ -1,8 +1,7 @@
-const dotenv = require('dotenv');
-const app = require('./app');
 const mongoose = require('mongoose');
-
-dotenv.config({ path: './config.env' });
+const dotenv = require('dotenv');
+dotenv.config({ path: './config.env' }); // This should not under the require app because of the middlewares
+const app = require('./app');
 
 // HOSTED DATABASE connection is below
 mongoose
