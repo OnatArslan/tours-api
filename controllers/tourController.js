@@ -25,6 +25,32 @@ exports.getAllTours = async (req, res) => {
     // Build the query with the modified query string. Additional functionalities like sort, paginate can be chained here.
     let query = Tour.find(JSON.parse(queryStr));
 
+    // Step 4: SORTING
+    // Check if a sort parameter is provided in the query string
+    if (req.query.sort) {
+      // If a sort parameter exists, it means the client wants to sort the results based on one or more fields.
+      // The sort parameter can include multiple fields separated by commas, e.g., "price,ratingsAverage"
+
+      // Convert the sort parameter from comma-separated values to space-separated values
+      // This is because MongoDB expects space-separated fields for sorting
+      // For example, "price,ratingsAverage" becomes "price ratingsAverage"
+      const sortBy = req.query.sort.split(`,`).join(` `);
+
+      // Log the sortBy value to the console for debugging purposes
+      // This helps in understanding what fields the query is being sorted by
+      console.log(sortBy);
+
+      // Apply the sorting to the query
+      // The sort method modifies the query to include the sorting order
+      // If sortBy is "price ratingsAverage", it sorts by price first, then by ratingsAverage
+      query = query.sort(sortBy);
+    } else {
+      // If no sort parameter is provided, default to sorting by createdAt field in descending order
+      // This means the most recently created documents will be returned first
+      // The "-" before "createdAt" indicates descending order. Without "-", it would be ascending.
+      query = query.sort(`-createdAt`);
+    }
+
     // Execute the query to get the list of tours that match the query criteria
     const tours = await query;
     // Count the number of tours returned to include in the response
