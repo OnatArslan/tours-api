@@ -1,5 +1,29 @@
 const Tour = require('./../models/tourModel');
 
+// This middleware function is designed to modify the request query parameters for a specific route.
+// It's typically used to create a shortcut or alias for a complex query, making it easier for clients to request popular data sets.
+exports.aliasTopTours = async (req, res, next) => {
+  // Set the 'limit' query parameter to '5'.
+  // This limits the number of tours returned by the query to the top 5.
+  // It's useful for a feature like "Top 5 Tours" where only a small, specific set of data is needed.
+  req.query.limit = `5`;
+
+  // Set the 'sort' query parameter to '-ratingsAverage,price'.
+  // This sorts the tours first by ratingsAverage in descending order (hence the '-') and then by price in ascending order.
+  // This sorting order helps in fetching the top-rated tours while also considering cost-efficiency.
+  req.query.sort = `-ratingsAverage,price`;
+
+  // Set the 'fields' query parameter to include only specific fields in the response.
+  // Here, only 'name', 'price', 'ratingsAverage', 'summary', and 'difficulty' fields of the tours will be included.
+  // This is a form of field limiting, which optimizes the response size and focuses on the most relevant tour information.
+  req.query.fields = `name,price,ratingsAverage,summary,difficulty`;
+
+  // Call the next middleware in the stack.
+  // At this point, the request query has been modified with preset values, and the request can proceed to the next operation,
+  // which could be the actual fetching of tours based on these modified query parameters.
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
     // Step 1: Filtering
@@ -73,11 +97,22 @@ exports.getAllTours = async (req, res) => {
       // The "__v" field is automatically added by MongoDB to each document for versioning, but it's rarely useful to clients.
       // We use the select() method with "-__v" to explicitly exclude this field from the results.
       query = query.select(`-__v`);
+      // After this step, the query is configured to either limit the fields based on the client's request or exclude the "__v" field by default.
+      // The query can then proceed to other operations like sorting, pagination, etc., before execution.
     }
 
-    // After this step, the query is configured to either limit the fields based on the client's request or exclude the "__v" field by default.
-    // The query can then proceed to other operations like sorting, pagination, etc., before execution.
-
+    // Step 5 Pagination
+    // ?page=2&limit=10
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) {
+        throw new Error(`This page does not exist`);
+      }
+    }
     // Execute the query to get the list of tours that match the query criteria
     const tours = await query;
     // Count the number of tours returned to include in the response
@@ -96,7 +131,7 @@ exports.getAllTours = async (req, res) => {
     // Error Handling: Respond with a 404 status code and the error message if the query fails
     res.status(404).json({
       status: 'fail',
-      message: err
+      message: err.message
     });
   }
 };
