@@ -51,6 +51,13 @@ exports.getAllTours = async (req, res) => {
       query = query.sort(`-createdAt`);
     }
 
+    // Step 4 FIELD LIMITING
+    if (req.query.fields) {
+      const fields = req.query.fields.split(`,`).join(` `);
+      query = query.select(fields); //
+    } else {
+      query = query.select(`-__v`);
+    }
     // Execute the query to get the list of tours that match the query criteria
     const tours = await query;
     // Count the number of tours returned to include in the response
