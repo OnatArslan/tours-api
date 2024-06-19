@@ -51,13 +51,33 @@ exports.getAllTours = async (req, res) => {
       query = query.sort(`-createdAt`);
     }
 
-    // Step 4 FIELD LIMITING
+    // Step 4: FIELD LIMITING
+    // This step allows clients to specify which fields of the data they want to receive in the response.
+    // It's particularly useful for optimizing data transfer, especially in cases where only a subset of the data is needed.
+
+    // Check if the "fields" query parameter is provided in the request.
+    // The "fields" parameter allows clients to specify a comma-separated list of field names they are interested in.
     if (req.query.fields) {
+      // If the "fields" parameter is present, process it to format suitable for MongoDB query.
+
+      // The fields specified by the client are in comma-separated format, e.g., "name,price,duration".
+      // MongoDB expects a space-separated list for selecting specific fields, so we replace commas with spaces.
       const fields = req.query.fields.split(`,`).join(` `);
-      query = query.select(fields); //
+
+      // Apply the field selection to the query.
+      // The select() method of Mongoose is used here to specify which fields to include or exclude in the result set.
+      // After this operation, the query will only fetch the fields specified by the client.
+      query = query.select(fields);
     } else {
+      // If the "fields" parameter is not provided, exclude the "__v" field by default.
+      // The "__v" field is automatically added by MongoDB to each document for versioning, but it's rarely useful to clients.
+      // We use the select() method with "-__v" to explicitly exclude this field from the results.
       query = query.select(`-__v`);
     }
+
+    // After this step, the query is configured to either limit the fields based on the client's request or exclude the "__v" field by default.
+    // The query can then proceed to other operations like sorting, pagination, etc., before execution.
+
     // Execute the query to get the list of tours that match the query criteria
     const tours = await query;
     // Count the number of tours returned to include in the response
