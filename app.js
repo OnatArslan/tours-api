@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const AppError = require(`./utils/appError`);
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -26,9 +27,9 @@ app.use('/api/v1/users', userRouter);
 // Handling wrong requests - We must place this middleware all routes because
 app.all(`*`, (req, res, next) => {
   const err = new Error(`Can't find ${req.originalUrl} on this server!`);
-  err.status = `fail`;
-  err.statusCode = 404;
-  next(err); // When we use a error handler middleware we must use next() with error parameter
+  // console.log(err.stack); // err.stack show us where the error happened
+
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404)); // When we use a error handler middleware we must use next() with error parameter
 });
 
 // ERROR HANDLER MIDDLEWARE
