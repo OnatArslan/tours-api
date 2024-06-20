@@ -25,11 +25,21 @@ app.use('/api/v1/users', userRouter);
 
 // Handling wrong requests - We must place this middleware all routes because
 app.all(`*`, (req, res, next) => {
-  res.status(404).json({
-    status: `fail`,
-    message: `Can't find ${req.originalUrl}`
+  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+  err.status = `fail`;
+  err.statusCode = 404;
+  next(err); // When we use a error handler middleware we must use next() with error parameter
+});
+
+// ERROR HANDLER MIDDLEWARE
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || `error`;
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message
   });
-  next();
 });
 
 module.exports = app;
