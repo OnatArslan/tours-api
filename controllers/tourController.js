@@ -232,26 +232,31 @@ exports.deleteTour = async (req, res) => {
 // Aggregation Pipeline
 exports.getTourStats = async (req, res) => {
   try {
+    // Perform an aggregation operation on the Tour collection.
     const stats = await Tour.aggregate([
       {
-        $match: { ratingsAverage: { $gte: 4.5 } }
+        // $match stage: Filters documents to pass only those that meet the specified condition(s) to the next pipeline stage.
+        $match: { ratingsAverage: { $gte: 4.5 } } // This condition selects documents where ratingsAverage is greater than or equal to 4.5.
       },
       {
+        // $group stage: Groups input documents by the specified '_id' expression and for each distinct grouping, outputs a document.
         $group: {
-          _id: { $toUpper: `$difficulty` },
-          count: { $count: {} },
-          avgRating: { $avg: `$ratingsAverage` },
-          numRatings: { $sum: `$ratingsQuantity` },
-          avgPrice: { $avg: `$price` },
-          minPrice: { $min: `$price` },
-          maxPrice: { $max: `$price` }
+          _id: { $toUpper: `$difficulty` }, // Group by 'difficulty' field, converting its value to uppercase.
+          count: { $count: {} }, // Counts the number of documents in each group.
+          avgRating: { $avg: `$ratingsAverage` }, // Calculates the average of 'ratingsAverage' for documents in each group.
+          numRatings: { $sum: `$ratingsQuantity` }, // Sums up 'ratingsQuantity' for documents in each group.
+          avgPrice: { $avg: `$price` }, // Calculates the average of 'price' for documents in each group.
+          minPrice: { $min: `$price` }, // Finds the minimum 'price' in each group.
+          maxPrice: { $max: `$price` } // Finds the maximum 'price' in each group.
         }
       },
       {
-        $sort: { avgPrice: 1 }
+        // $sort stage: Sorts all input documents and returns them to the pipeline in sorted order.
+        $sort: { avgPrice: 1 } // Sorts the documents by 'avgPrice' in ascending order (1 for ascending, -1 for descending).
       }
+      // The commented-out part below is an additional $match stage that could be used to filter out documents after grouping.
       // {
-      //   $match: { _id: { $ne: `EASY` } } // now _id is difficulty field
+      //   $match: { _id: { $ne: `EASY` } } // This condition would exclude documents where the '_id' (difficulty in uppercase) is not equal to 'EASY'.
       // }
     ]);
 
@@ -269,40 +274,49 @@ exports.getTourStats = async (req, res) => {
 
 exports.getMonthlyPlan = async (req, res) => {
   try {
+    // Convert the year parameter from the request to a number.
     const year = req.params.year * 1;
 
+    // Execute an aggregation pipeline on the Tour collection.
     const plan = await Tour.aggregate([
       {
+        // $unwind stage: Deconstructs an array field from the input documents to output a document for each element.
         $unwind: `$startDates`
       },
       {
+        // $match stage: Filters the documents to pass only those that match the specified condition(s).
         $match: {
           startDates: {
-            $gte: new Date(`${year}-01-01`),
-            $lte: new Date(`${year}-12-31`)
+            $gte: new Date(`${year}-01-01`), // Greater than or equal to the first day of the year.
+            $lte: new Date(`${year}-12-31`) // Less than or equal to the last day of the year.
           }
         }
       },
       {
+        // $group stage: Groups input documents by a specified identifier expression and applies the accumulator expressions.
         $group: {
-          _id: { $month: `$startDates` },
-          numTourStarts: { $count: {} },
-          tours: { $push: `$name` }
+          _id: { $month: `$startDates` }, // Groups the documents by month of the startDates.
+          numTourStarts: { $count: {} }, // Counts the number of tours starting in each month.
+          tours: { $push: `$name` } // Creates an array of tour names starting in each month.
         }
       },
       {
+        // $addFields stage: Adds new fields to documents. Here, it adds the 'month' field with the value of '_id'.
         $addFields: { month: `$_id` }
       },
       {
+        // $project stage: Specifies the inclusion of fields to output (1 for inclusion, 0 for exclusion).
         $project: {
-          _id: 0
+          _id: 0 // Excludes the '_id' field from the output documents.
         }
       },
       {
-        $sort: { numTourStarts: -1 }
+        // $sort stage: Sorts all input documents and returns them to the pipeline in sorted order.
+        $sort: { numTourStarts: -1 } // Sorts documents by 'numTourStarts' in descending order.
       },
       {
-        $limit: 12
+        // $limit stage: Limits the number of documents passed to the next stage in the pipeline.
+        $limit: 12 // Limits the result to the top 12 months.
       }
     ]);
 
