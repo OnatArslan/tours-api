@@ -157,10 +157,7 @@ exports.getTour = async (req, res) => {
 
 exports.createTour = async (req, res) => {
   try {
-    const newTour = await Tour.create(
-      req.body
-      // mongoose create() method can take options argument as a 2.
-    );
+    const newTour = await Tour.create(req.body, { runValidators: true });
 
     res.status(201).json({
       status: 'success',

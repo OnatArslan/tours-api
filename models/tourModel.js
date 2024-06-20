@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 // Creating a mongoose schema
 const toursSchema = new mongoose.Schema(
@@ -8,8 +9,14 @@ const toursSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, `A tour must have a price`],
-      unique: [true, `A user must have unique name`],
-      trim: true
+      unique: [true, `A user must have unique name`], // Unique is not a real validator
+      trim: true,
+      maxLength: [40, `A tour name must have less or equal than 40 char`],
+      minLength: [10, `A tour name must have less or equal than 10 char`]
+      // validate: {
+      //   validator: validator.isAlpha,
+      //   message: `You must use only characters` // isAlpha return false with whitespaces because of that I don't use right now
+      // }
     },
     slug: {
       type: String
@@ -24,11 +31,17 @@ const toursSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      required: [true, `A tour must have a difficulty`]
+      required: [true, `A tour must have a difficulty`],
+      enum: {
+        values: [`easy`, `medium`, `difficult`],
+        message: `Difficulty is either: easy, medium, difficult`
+      }
     },
     ratingsAverage: {
       type: Number,
-      default: 4.5
+      default: 4.5,
+      min: [1, `A rating must be above 1.0`],
+      max: [5, `A rating must be above 5.0`]
     },
     ratingsQuantity: {
       type: Number,
@@ -43,7 +56,14 @@ const toursSchema = new mongoose.Schema(
       required: [true, `A tour must have a price`]
     },
     priceDiscount: {
-      type: Number
+      type: Number,
+      validate: {
+        validator: function(val) {
+          // this only points to current doc on NEW document creation we can not use this validator on update()
+          return val < this.price; // val is priceDiscount and this.price is price of tour, this keyword referance for document
+        },
+        message: `Price discount ({VALUE}) can not be lower than original price`
+      }
     },
     summary: {
       type: String,
