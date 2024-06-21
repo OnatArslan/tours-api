@@ -47,6 +47,7 @@ const userSchema = new mongoose.Schema(
 // HASH THE PASSWORD WITH PRE SAVE MIDDLEWARE
 // Define a pre-save middleware for the user schema.
 // This middleware will execute before a user document is saved to the database.
+// USE ASYNC FUNCTION MUST USEEE
 userSchema.pre(`save`, async function(next) {
   // Check if the password field has been modified.
   // If not, skip the hashing process and proceed to the next middleware or save operation.
