@@ -48,32 +48,44 @@ exports.signUp = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    // const { email, password } = req.body; // This is ES6 object destructuring
+    // Retrieve email and password from request body
     const email = req.body.email;
-    const password = req.body.password.toString();
+    const password = req.body.password.toString(); // Convert password to string to ensure compatibility with bcrypt
 
-    // 1) Check if email and password exist
+    // 1) Verify both email and password are provided in the request
     if (!email || !password) {
+      // If either is missing, return a 400 Bad Request response
       return res.status(400).json({
         status: `fail`,
         message: `Please provide a password and email`
       });
     }
-    // 2) Check if user exist && password is correct
-    const user = await User.findOne({ email: email }).select(`+password`); // because of password select prop is false we must do it manually
 
-    // const isCorrect = await user.checkPassowordIsEqual(password, user.password); We can not use it here because if user is undefined this will give an error
+    // 2) Attempt to find the user by email and explicitly select the password field
+    // The password field is not selected by default for security reasons, hence the '+password'
+    const user = await User.findOne({ email: email }).select(`+password`);
 
+    // Check if the user exists and the password is correct
+    // Note: We avoid calling the password check method directly on a potentially null user object
     if (!user || !(await user.checkPassowordIsEqual(password, user.password))) {
+      // If the user doesn't exist or the password is incorrect, return a 401 Unauthorized response
       return res.status(401).json({
         status: `fail`,
         message: `Email or password is not correct`
       });
     }
+
+    // 3) Generate a JWT for the user if authentication is successful
+    // jwt.sign() takes three parameters:
+    // - A payload to include in the token, here it's the user's ID
+    // - A secret key to sign the token, typically stored in an environment variable for security
+    // - An options object, where we set the token to expire in 2 days
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: `2 days`
     });
-    // 3) If everything ok, send token to client
+
+    // 4) Respond with a 200 OK status, the token, and user data
+    // This indicates successful authentication
     res.status(200).json({
       status: `success`,
       token: token,
@@ -82,6 +94,7 @@ exports.login = async (req, res, next) => {
       }
     });
   } catch (err) {
+    // Log the error and return a 401 Unauthorized response if an exception occurs
     console.log(err);
     return res.status(401).json({
       status: `fail`,

@@ -47,10 +47,18 @@ const userSchema = new mongoose.Schema(
 
 // CHECK PASSOWORDS ARE EQUAL FUNCTION
 // INSTANCE METHOD
-userSchema.methods.checkPassowordIsEqual = async function(
+// Inside the user model definition, assuming there's a method like this:
+userSchema.methods.checkPasswordIsEqual = async function(
   candidatePassword,
   userPassword
 ) {
+  // bcrypt.compare function is used here to check if the candidate password matches the user's hashed password.
+  // It takes two parameters:
+  // 1. candidatePassword: The plain text password provided by the user attempting to log in.
+  // 2. userPassword: The hashed password stored in the database for the user.
+  // bcrypt.compare then hashes the candidatePassword with the same salt used for the userPassword and compares the result.
+  // If both hashes match, it returns true, indicating the passwords are equal.
+  // If they don't match, it returns false, indicating the login attempt should be rejected.
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
