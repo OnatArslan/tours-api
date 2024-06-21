@@ -29,7 +29,6 @@ exports.getAllTours = async (req, res) => {
     // Step 1: Filtering
     // Create a hard copy of req.query to manipulate without altering the original request
     const queryObj = { ...req.query }; // Original query object after removing excluded fields
-    console.log(queryObj);
     // Define fields that should not be used for filtering but are reserved for other functionalities
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     // Remove these fields from the query object to isolate only the fields meant for filtering

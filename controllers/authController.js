@@ -1,6 +1,8 @@
 const User = require('./../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const AppError = require('./../utils/appError');
+const util = require('util');
 
 // SIGNUP FUNCTION ------------------
 // Define an asynchronous function for handling user sign-up.
@@ -23,7 +25,7 @@ exports.signUp = async (req, res, next) => {
     // 2. The secret key: Loaded from an environment variable for security.
     // 3. Options: expiresIn defines the token's validity period. After 2 days, the token expires and cannot be used.
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: `2 days`
+      expiresIn: '2 days'
     });
 
     // Send a response with status code 201 (Created), including the token and user data.
@@ -67,7 +69,7 @@ exports.login = async (req, res, next) => {
 
     // Check if the user exists and the password is correct
     // Note: We avoid calling the password check method directly on a potentially null user object
-    if (!user || !(await user.checkPassowordIsEqual(password, user.password))) {
+    if (!user || !(await user.checkPasswordIsEqual(password, user.password))) {
       // If the user doesn't exist or the password is incorrect, return a 401 Unauthorized response
       return res.status(401).json({
         status: `fail`,
@@ -100,5 +102,45 @@ exports.login = async (req, res, next) => {
       status: `fail`,
       message: err.message
     });
+  }
+};
+
+// LOGIN REQUIRED CONTROLLER
+exports.protect = async (req, res, next) => {
+  try {
+    // 1) Getting token and check if it exist
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith(`Bearer`)
+    ) {
+      token = req.headers.authorization.split(` `)[1];
+    }
+    if (!token) {
+      return next(
+        new AppError(`You are not logged in! Please log in to get access`, 401)
+      );
+    }
+
+    // 2) VALIDATE TOKEN VERIFICATION
+    const decodedToken = await util.promisify(jwt.verify)(
+      token,
+      process.env.JWT_SECRET
+    );
+    console.log(`Decoded token is here`);
+    console.log(decodedToken);
+    // 3) Check if user still exist
+    const freshUser = await User.findById(decodedToken.id); // token.id is our guide to access current user
+    if (!freshUser) {
+      return next(
+        new AppError(`The user belong to this token does no longer exist`, 401)
+      );
+    }
+
+    // 4) Check if user changed password after the JWToken was issued
+
+    next();
+  } catch (err) {
+    return next(new AppError(err.message), 401);
   }
 };

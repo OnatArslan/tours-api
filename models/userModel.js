@@ -82,7 +82,6 @@ userSchema.pre(`save`, async function(next) {
   // Remove the passwordConfirm field from the document.
   // This field is used for validation purposes only and should not be stored in the database.
   this.passwordConfirm = undefined;
-
   // Proceed to the next middleware or complete the save operation.
   next();
 });
