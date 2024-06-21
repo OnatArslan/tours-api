@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, `Password is required`],
-      minLength: [8, `Passoword must include at least 8 characters`]
+      minLength: [8, `Passoword must include at least 8 characters`],
+      select: false
     },
     passwordConfirm: {
       type: String,
@@ -43,6 +44,15 @@ const userSchema = new mongoose.Schema(
   },
   {}
 );
+
+// CHECK PASSOWORDS ARE EQUAL FUNCTION
+// INSTANCE METHOD
+userSchema.methods.checkPassowordIsEqual = async function(
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 // HASH THE PASSWORD WITH PRE SAVE MIDDLEWARE
 // Define a pre-save middleware for the user schema.

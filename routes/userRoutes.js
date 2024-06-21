@@ -9,6 +9,10 @@ const router = express.Router();
 // This route listens for POST requests on the `/signup` path and uses the signUp method from authController to handle the request.
 router.post(`/signup`, authController.signUp);
 
+// Define a POST route for user login
+// This route listens for POST requests on the `/login` path and uses the signUp method from authController to handle the request.
+router.post(`/login`, authController.login);
+
 // Define routes for the base path '/'
 // This chain of methods applies to the base path '/' for different HTTP methods.
 router
