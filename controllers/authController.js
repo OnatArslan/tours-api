@@ -194,3 +194,40 @@ exports.restrictTo = function(...roles) {
 // This middleware authenticates the user and attaches their details to `req.user`.
 // For example, after verifying a user's token, the middleware might do something like `req.user = user;`
 // This makes the user's information available in `req.user` for subsequent middleware and routes.
+
+// ----------------------------------------------------------------------------------------------------------------
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    // 1) Get user based on POSTed email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return next(
+        new AppError(
+          `There is no user with email adress please check your adress`,
+          404
+        )
+      );
+    }
+    // console.log(user); for testing
+
+    // 2) Generate the random token
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+    // 3) Send it to user's email
+  } catch (err) {
+    res.status(500).json({
+      status: `fail`,
+      message: err.message
+    });
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+  } catch (err) {
+    res.status(500).json({
+      status: `fail`,
+      message: err.message
+    });
+  }
+};

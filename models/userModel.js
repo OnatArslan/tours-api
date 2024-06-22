@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 // name email photo password passwordConfirm
 const userSchema = new mongoose.Schema(
@@ -44,6 +45,12 @@ const userSchema = new mongoose.Schema(
         },
         message: `Passwords are not match`
       }
+    },
+    passwordResetToken: {
+      type: String
+    },
+    passwordResetExpires: {
+      type: Date
     },
     passwordChangedAt: {
       type: Date
@@ -108,6 +115,31 @@ userSchema.pre(`save`, async function(next) {
   // Proceed to the next middleware or complete the save operation.
   next();
 });
+
+// Adding a method to userSchema to create a password reset token
+userSchema.methods.createPasswordResetToken = function() {
+  // Generate a random token using crypto
+  const resetToken = crypto.randomBytes(32).toString(`hex`);
+
+  // Hash the token and set it to the user's passwordResetToken field for secure storage
+  // This hashed token will be saved in the database for verification when the user resets their password
+  this.passwordResetToken = crypto
+    .createHash(`sha256`)
+    .update(resetToken)
+    .digest(`hex`);
+
+  // Logging the reset token and its hashed version for debugging purposes
+  // Note: In production, sensitive information like tokens should not be logged
+  console.log({ resetToken }, this.passwordResetToken);
+
+  // Set the expiration time for the reset token to 10 minutes from the current time
+  // This adds a layer of security by limiting the time window in which the token can be used
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // Return the unhashed reset token
+  // This token will be sent to the user (e.g., via email) to allow them to reset their password
+  return resetToken;
+};
 
 const User = mongoose.model(`User`, userSchema);
 

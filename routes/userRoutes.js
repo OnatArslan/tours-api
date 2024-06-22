@@ -38,6 +38,10 @@ router
   // When a DELETE request is made to '/:id', it's handled by the deleteUser method of userController, which removes a user based on their ID.
   .delete(userController.deleteUser);
 
+router.route(`/forgot-password`).post(authController.forgotPassword);
+
+router.route(`/reset-password`).post(authController.resetPassword);
+
 // Export the router
 // This makes the router available for use in other parts of the application, typically by importing it in the main server file.
 module.exports = router;
