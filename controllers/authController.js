@@ -257,17 +257,14 @@ exports.resetPassword = async (req, res, next) => {
       .createHash('sha256')
       .update(req.params.token)
       .digest('hex');
-    console.log(hashedToken);
 
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gte: Date.now() }
     });
-    console.log(user);
+
     // 2) If token has not expired, and there is user, set the new password
     if (!user) {
-      console.log(`anani sikim`);
-
       return next(new AppError('Token is invalid or has expired', 400));
     }
 
@@ -291,6 +288,70 @@ exports.resetPassword = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
+    res.status(500).json({
+      status: 'fail',
+      message: err.message
+    });
+  }
+};
+
+// Function to update the user's password
+exports.updatePassword = async (req, res, next) => {
+  try {
+    // 1) Retrieve the user from the database using the ID from the request object and select the password field explicitly
+    const user = await User.findById(req.user._id).select('+password');
+
+    // 2) Check if the provided current password matches the user's current password
+    const inputPassword = req.body.curPassword.toString();
+    if (!(await user.checkPasswordIsEqual(inputPassword, user.password))) {
+      // If the passwords do not match, return an error
+      return next(
+        new AppError(
+          'Your current password is incorrect. If you forgot your password, please reset it.',
+          400
+        )
+      );
+    }
+
+    // 3) Check if the new password and password confirmation are provided and match
+    if (
+      !req.body.password ||
+      !req.body.passwordConfirm ||
+      req.body.password !== req.body.passwordConfirm
+    ) {
+      // If not, return an error
+      return next(new AppError('Please confirm your new password.', 400));
+    }
+
+    // 4) Update the user's password and passwordConfirm fields
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm;
+    // Save the updated user document. This will trigger the pre-save middleware to hash the new password
+    await user.save();
+
+    // 5) Generate a new JWT token for the user
+    try {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '2 days'
+      });
+
+      // 6) Respond with a success message and the new token
+      res.status(200).json({
+        status: 'success',
+        message: 'Password changed successfully',
+        token: token
+      });
+    } catch (jwtError) {
+      console.error('JWT Error:', jwtError.message);
+      return next(
+        new AppError(
+          'Failed to generate authentication token. Please try again.',
+          500
+        )
+      );
+    }
+  } catch (err) {
+    // If an error occurs, respond with the error message
     res.status(500).json({
       status: 'fail',
       message: err.message
