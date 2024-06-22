@@ -5,6 +5,18 @@ const authController = require('./../controllers/authController');
 // Import the express module to create a router
 const router = express.Router();
 
+router
+  .route(`/update-password`)
+  .patch(authController.protect, authController.updatePassword);
+
+router
+  .route(`/update-me`)
+  .patch(authController.protect, userController.updateMe);
+
+router.route(`/forgot-password`).post(authController.forgotPassword);
+
+router.route(`/reset-password/:token`).patch(authController.resetPassword);
+
 // Define a POST route for user signup
 // This route listens for POST requests on the `/signup` path and uses the signUp method from authController to handle the request.
 router.post(`/signup`, authController.signUp);
@@ -37,14 +49,6 @@ router
   // DELETE request handler for removing a user by ID
   // When a DELETE request is made to '/:id', it's handled by the deleteUser method of userController, which removes a user based on their ID.
   .delete(userController.deleteUser);
-
-router
-  .route(`/update-password`)
-  .post(authController.protect, authController.updatePassword);
-
-router.route(`/forgot-password`).post(authController.forgotPassword);
-
-router.route(`/reset-password/:token`).patch(authController.resetPassword);
 
 // Export the router
 // This makes the router available for use in other parts of the application, typically by importing it in the main server file.

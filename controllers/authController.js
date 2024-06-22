@@ -132,6 +132,7 @@ exports.protect = async (req, res, next) => {
 
     // Step 2: Validate the token to ensure it's legitimate and not expired
     // 'jwt.verify' is promisified to work with async/await syntax
+    console.log(token);
     const decodedToken = await util.promisify(jwt.verify)(
       token,
       process.env.JWT_SECRET

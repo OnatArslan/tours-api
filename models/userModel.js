@@ -126,7 +126,7 @@ userSchema.pre('save', function(next) {
     console.log(`Buraya girdi`);
     return next();
   }
-  this.passwordChangedAt = Date.now() - 1000;
+  this.passwordChangedAt = Date.now() - 3000;
   console.log(`Password changed at set for user: ${this._id}`);
   next();
 });
