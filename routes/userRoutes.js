@@ -40,7 +40,7 @@ router
 
 router.route(`/forgot-password`).post(authController.forgotPassword);
 
-router.route(`/reset-password/:token`).post(authController.resetPassword);
+router.route(`/reset-password/:token`).patch(authController.resetPassword);
 
 // Export the router
 // This makes the router available for use in other parts of the application, typically by importing it in the main server file.

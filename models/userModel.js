@@ -116,6 +116,21 @@ userSchema.pre(`save`, async function(next) {
   next();
 });
 
+userSchema.pre('save', function(next) {
+  console.log(
+    `Saving user: ${this._id}, Modified password: ${this.isModified(
+      'password'
+    )}, Is new: ${this.isNew}`
+  );
+  if (!this.isModified('password') || this.isNew) {
+    console.log(`Buraya girdi`);
+    return next();
+  }
+  this.passwordChangedAt = Date.now() - 1000;
+  console.log(`Password changed at set for user: ${this._id}`);
+  next();
+});
+
 // Adding a method to userSchema to create a password reset token
 userSchema.methods.createPasswordResetToken = function() {
   // Generate a random token using crypto

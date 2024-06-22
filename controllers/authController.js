@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
 const util = require('util');
+const crypto = require('crypto');
 
 // SIGNUP FUNCTION ------------------
 // Define an asynchronous function for handling user sign-up.
@@ -228,7 +229,6 @@ exports.forgotPassword = async (req, res, next) => {
         message: message
       });
     } catch (err) {
-      console.log(err);
       user.passwordResetToken = undefined;
       user.passwordResetExpires = undefined;
       await user.save({ validateBeforeSave: false });
@@ -243,7 +243,6 @@ exports.forgotPassword = async (req, res, next) => {
       message: `Token sent to email`
     });
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       status: `fail`,
       message: err.message
@@ -253,9 +252,47 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
+    // 1) Get user based on the token
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+    console.log(hashedToken);
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gte: Date.now() }
+    });
+    console.log(user);
+    // 2) If token has not expired, and there is user, set the new password
+    if (!user) {
+      console.log(`anani sikim`);
+
+      return next(new AppError('Token is invalid or has expired', 400));
+    }
+
+    user.password = req.body.password;
+    user.passwordConfirm = req.body.passwordConfirm; // Corrected from res.body to req.body
+    user.passwordResetToken = undefined; // Clear the reset token
+    user.passwordResetExpires = undefined; // Clear the token expiry time
+    await user.save();
+
+    // 3) Optionally, update changedPasswordAt property for the user in User model
+    // This step depends on your User model. If you have a hook or middleware handling it, you might not need to explicitly set it here.
+
+    // 4) Log the user in, send JWT
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '2 days'
+    });
+
+    res.status(200).json({
+      status: 'success',
+      token: token
+    });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
-      status: `fail`,
+      status: 'fail',
       message: err.message
     });
   }
