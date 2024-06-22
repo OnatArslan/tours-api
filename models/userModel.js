@@ -5,6 +5,13 @@ const bcrypt = require('bcryptjs');
 // name email photo password passwordConfirm
 const userSchema = new mongoose.Schema(
   {
+    role: {
+      type: String,
+      enum: {
+        values: [`user`, `guide`, `lead-guide`, `admin`]
+      },
+      default: `user`
+    },
     name: {
       type: String,
       required: [true, `Name is required`],

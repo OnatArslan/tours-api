@@ -17,7 +17,8 @@ exports.signUp = async (req, res, next) => {
       email: req.body.email,
       password: req.body.password,
       passwordConfirm: req.body.passwordConfirm,
-      passwordChangedAt: req.body.passwordChangedAt
+      passwordChangedAt: req.body.passwordChangedAt,
+      role: req.body.role
     });
 
     // Generate a JSON Web Token (JWT) for the new user.
@@ -159,6 +160,7 @@ exports.protect = async (req, res, next) => {
 
     // Grant access to the protected route
     // Attach the user object to the request for use in downstream handlers
+    // We can use req.user on middlewares after this one like restrictTo
     req.user = freshUser;
     next();
   } catch (err) {
@@ -167,3 +169,28 @@ exports.protect = async (req, res, next) => {
     return next(new AppError('Authentication failed', 401));
   }
 };
+
+// Define a function to restrict access to certain roles
+exports.restrictTo = function(...roles) {
+  // Return an asynchronous middleware function
+  return async function(req, res, next) {
+    try {
+      // Check if the role of the current user is not included in the allowed roles
+      if (!roles.includes(req.user.role)) {
+        // If the user's role is not allowed, return an error and prevent further actions
+        return next(
+          new AppError(`You do not have permission to perform this action`, 403)
+        );
+      }
+      // If the user has an allowed role, proceed to the next middleware or controller
+      next();
+    } catch (err) {
+      // In case of any errors during the check, return an authorization failure error
+      return next(new AppError(`Authorization failed`, 403));
+    }
+  };
+};
+// Note: `req.user` comes from a previous authentication middleware.
+// This middleware authenticates the user and attaches their details to `req.user`.
+// For example, after verifying a user's token, the middleware might do something like `req.user = user;`
+// This makes the user's information available in `req.user` for subsequent middleware and routes.

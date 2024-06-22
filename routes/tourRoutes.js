@@ -1,25 +1,38 @@
-const express = require('express');
-const tourController = require('./../controllers/tourController');
-const authController = require('./../controllers/authController');
+// Importing necessary modules
+const express = require('express'); // Express framework to handle routes
+const tourController = require('./../controllers/tourController'); // Controller for tour-related operations
+const authController = require('./../controllers/authController'); // Controller for authentication and authorization
 
+// Creating a new router object to handle routes for tours
 const router = express.Router();
 
+// Route for getting all tours and creating a new tour
 router
   .route('/')
-  .get(authController.protect, tourController.getAllTours)
-  .post(tourController.createTour);
+  .get(authController.protect, tourController.getAllTours) // GET request to retrieve all tours, with authentication
+  .post(tourController.createTour); // POST request to create a new tour
 
+// Route for getting top 5 cheap tours
 router
-  .route(`/top-5-cheap`)
-  .get(tourController.aliasTopTours, tourController.getAllTours);
+  .route('/top-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours); // GET request to retrieve top 5 cheap tours
 
-router.route(`/tour-stats`).get(tourController.getTourStats);
-router.route(`/monthly-plan/:year`).get(tourController.getMonthlyPlan);
+// Route for getting tour statistics
+router.route('/tour-stats').get(tourController.getTourStats); // GET request to retrieve tour statistics
 
+// Route for getting monthly plan for a given year
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan); // GET request to retrieve monthly plan for tours
+
+// Routes for specific tour identified by its ID
 router
   .route('/:id')
-  .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+  .get(tourController.getTour) // GET request to retrieve a single tour by its ID
+  .patch(tourController.updateTour) // PATCH request to update a tour by its ID
+  .delete(
+    authController.protect, // Middleware to protect the route, ensuring only authenticated users can access
+    authController.restrictTo('admin', 'lead-guide'), // Middleware to restrict access to certain roles
+    tourController.deleteTour // DELETE request to delete a tour by its ID
+  );
 
+// Exporting the router to be used in the main application file
 module.exports = router;
