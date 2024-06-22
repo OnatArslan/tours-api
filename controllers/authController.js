@@ -2,6 +2,7 @@ const User = require('./../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const AppError = require('./../utils/appError');
+const sendEmail = require('./../utils/email');
 const util = require('util');
 
 // SIGNUP FUNCTION ------------------
@@ -214,7 +215,35 @@ exports.forgotPassword = async (req, res, next) => {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
     // 3) Send it to user's email
+    const resetURL = `${req.protocol}://${req.get(
+      `host`
+    )}/api/v1/users/reset-password/${resetToken}`;
+
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to ${resetURL}.\n If you didn't forget your password, please ignore this email`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: `Your password reset token (valid for 10 min)`,
+        message: message
+      });
+    } catch (err) {
+      console.log(err);
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return next(
+        new AppError(`There was an error sending the email! Try again later`),
+        500
+      );
+    }
+
+    res.status(200).json({
+      status: `success`,
+      message: `Token sent to email`
+    });
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       status: `fail`,
       message: err.message
