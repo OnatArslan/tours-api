@@ -16,7 +16,8 @@ exports.signUp = async (req, res, next) => {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm
+      passwordConfirm: req.body.passwordConfirm,
+      passwordChangedAt: req.body.passwordChangedAt
     });
 
     // Generate a JSON Web Token (JWT) for the new user.
@@ -105,42 +106,64 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// LOGIN REQUIRED CONTROLLER
+// This controller function is designed to protect routes that require user authentication.
 exports.protect = async (req, res, next) => {
   try {
-    // 1) Getting token and check if it exist
+    // Step 1: Attempt to retrieve the JWT token from the Authorization header
     let token;
+    // Check if the Authorization header exists and starts with 'Bearer'
     if (
       req.headers.authorization &&
-      req.headers.authorization.startsWith(`Bearer`)
+      req.headers.authorization.startsWith('Bearer')
     ) {
-      token = req.headers.authorization.split(` `)[1];
+      // Extract the token part after 'Bearer '
+      token = req.headers.authorization.split(' ')[1];
     }
+
+    // If no token is found, prevent access and return an error message
     if (!token) {
       return next(
-        new AppError(`You are not logged in! Please log in to get access`, 401)
+        new AppError('You are not logged in! Please log in to get access', 401)
       );
     }
 
-    // 2) VALIDATE TOKEN VERIFICATION
+    // Step 2: Validate the token to ensure it's legitimate and not expired
+    // 'jwt.verify' is promisified to work with async/await syntax
     const decodedToken = await util.promisify(jwt.verify)(
       token,
       process.env.JWT_SECRET
     );
-    console.log(`Decoded token is here`);
+    // Log the decoded token for debugging purposes
+    console.log('Decoded token is here');
     console.log(decodedToken);
-    // 3) Check if user still exist
-    const freshUser = await User.findById(decodedToken.id); // token.id is our guide to access current user
+
+    // Step 3: Check if the user associated with the token still exists
+    const freshUser = await User.findById(decodedToken.id); // Use token.id to find the current user in the database
+    // If the user doesn't exist, prevent access and return an error message
     if (!freshUser) {
       return next(
-        new AppError(`The user belong to this token does no longer exist`, 401)
+        new AppError(
+          'The user belonging to this token does no longer exist',
+          401
+        )
       );
     }
 
-    // 4) Check if user changed password after the JWToken was issued
+    // Step 4: Verify if the user has changed their password after the token was issued
+    if (freshUser.changedPasswordAfter(decodedToken.iat)) {
+      // If the password was changed, prevent access and prompt re-login
+      return next(
+        new AppError('User recently changed password! Please log in again', 401)
+      );
+    }
 
+    // Grant access to the protected route
+    // Attach the user object to the request for use in downstream handlers
+    req.user = freshUser;
     next();
   } catch (err) {
-    return next(new AppError(err.message), 401);
+    // Log any errors for debugging and return a generic error message
+    console.log(err);
+    return next(new AppError('Authentication failed', 401));
   }
 };

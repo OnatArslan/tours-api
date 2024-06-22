@@ -38,6 +38,9 @@ const userSchema = new mongoose.Schema(
         message: `Passwords are not match`
       }
     },
+    passwordChangedAt: {
+      type: Date
+    },
     photo: {
       type: String
     }
@@ -60,6 +63,19 @@ userSchema.methods.checkPasswordIsEqual = async function(
   // If both hashes match, it returns true, indicating the passwords are equal.
   // If they don't match, it returns false, indicating the login attempt should be rejected.
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+//
+userSchema.methods.changedPasswordAfter = function(JWTTimestampt) {
+  if (this.passwordChangedAt) {
+    const changedTimestampt = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return JWTTimestampt < changedTimestampt;
+  }
+  // False means not changed
+  return false;
 };
 
 // HASH THE PASSWORD WITH PRE SAVE MIDDLEWARE
