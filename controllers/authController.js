@@ -32,6 +32,13 @@ exports.signUp = async (req, res, next) => {
       expiresIn: '2 days'
     });
 
+    res.cookie(`jwt`, token, {
+      expires: new Date(
+        Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true
+    });
+
     // Send a response with status code 201 (Created), including the token and user data.
     // This confirms the user was registered successfully.
     res.status(201).json({
@@ -89,6 +96,16 @@ exports.login = async (req, res, next) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: `2 days`
     });
+
+    res.cookie(`jwt`, token, {
+      expires: new Date(
+        Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true
+    });
+
+    // Remove the password from output
+    user.password = undefined;
 
     // 4) Respond with a 200 OK status, the token, and user data
     // This indicates successful authentication
@@ -283,6 +300,13 @@ exports.resetPassword = async (req, res, next) => {
       expiresIn: '2 days'
     });
 
+    res.cookie(`jwt`, token, {
+      expires: new Date(
+        Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true
+    });
+
     res.status(200).json({
       status: 'success',
       token: token
@@ -334,6 +358,13 @@ exports.updatePassword = async (req, res, next) => {
     try {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: '2 days'
+      });
+
+      res.cookie(`jwt`, token, {
+        expires: new Date(
+          Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true
       });
 
       // 6) Respond with a success message and the new token
