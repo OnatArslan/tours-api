@@ -5,9 +5,8 @@ const authController = require(`./../controllers/authController`);
 const router = express.Router();
 
 router
-  .route(`/:tourId`)
+  .route(`/`)
+  .get(authController.protect, reviewController.getAllReviews)
   .post(authController.protect, reviewController.createReview);
-
-router.route(`/`).get(authController.protect, reviewController.getAllReviews);
 
 module.exports = router;

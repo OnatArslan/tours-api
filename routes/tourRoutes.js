@@ -2,6 +2,7 @@
 const express = require('express'); // Express framework to handle routes
 const tourController = require('./../controllers/tourController'); // Controller for tour-related operations
 const authController = require('./../controllers/authController'); // Controller for authentication and authorization
+const reviewController = require('./../controllers/reviewController');
 
 // Creating a new router object to handle routes for tours
 const router = express.Router();
@@ -32,6 +33,15 @@ router
     authController.protect, // Middleware to protect the route, ensuring only authenticated users can access
     authController.restrictTo('admin', 'lead-guide'), // Middleware to restrict access to certain roles
     tourController.deleteTour // DELETE request to delete a tour by its ID
+  );
+
+// Nested route
+router
+  .route(`/:tourId/reviews`)
+  .post(
+    authController.protect,
+    authController.restrictTo(`user`),
+    reviewController.createReview
   );
 
 // Exporting the router to be used in the main application file
