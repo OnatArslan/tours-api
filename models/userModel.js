@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema(
       },
       default: `user`
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+      select: false
+    },
     name: {
       type: String,
       required: [true, `Name is required`],
@@ -61,6 +66,12 @@ const userSchema = new mongoose.Schema(
   },
   {}
 );
+
+userSchema.pre(/^find/, function(next) {
+  // this points to current query
+  this.find({ isActive: { $ne: false } });
+  next();
+});
 
 // CHECK PASSOWORDS ARE EQUAL FUNCTION
 // INSTANCE METHOD

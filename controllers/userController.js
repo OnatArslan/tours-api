@@ -55,12 +55,38 @@ exports.updateMe = async (req, res, next) => {
   }
 };
 
-exports.getAllUsers = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!'
-  });
+exports.deleteMe = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, { isActive: false });
+    res.status(204).json({
+      status: `success`
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: `fail`,
+      message: err.message
+    });
+  }
 };
+
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const user = await User.find();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: user
+      }
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: `Fail`,
+      message: `Something went wrong`
+    });
+  }
+};
+
 exports.getUser = (req, res) => {
   res.status(500).json({
     status: 'error',
