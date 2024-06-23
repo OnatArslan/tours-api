@@ -139,13 +139,11 @@ const toursSchema = new mongoose.Schema(
   }
 );
 
-// When use find() related query we can output guides object in here
-toursSchema.pre(/^find/, function(next) {
-  this.populate({
-    path: 'guides',
-    select: `-__v -passwordChangedAt`
-  });
-  next();
+// Define a virtual property 'reviews' on the toursSchema Virtual Populate
+toursSchema.virtual('reviews', {
+  ref: 'Review', // Reference the 'Review' model. This tells Mongoose which model to use during population.
+  foreignField: 'tour', // The field in the 'Review' model that will correspond to the '_id' field of the 'Tour' model.
+  localField: '_id' // Review modelinde sadece _id kismi kayitli oldugundan ulasmak icin localField _id
 });
 
 // Define a virtual property for the toursSchema. Virtual properties are fields that Mongoose creates dynamically. They are not stored in the database.
@@ -160,6 +158,16 @@ toursSchema
 // - Virtual properties are useful for computed properties on documents. For example, converting a duration in days to weeks in this case.
 // - Arrow functions are not used here because they do not have their own `this` context. Instead, they inherit `this` from the parent scope at the time they are defined. In the context of Mongoose schema methods or virtuals, using a traditional function allows access to the document through `this`.
 // - Virtuals are not part of the database schema. This means you cannot use them in queries directly, like `Tours.find({durationWeeks: 2})`, because `durationWeeks` does not exist in the MongoDB collection.
+
+// QUERY MIDDLEWARE
+// When use find() related query we can output guides object in here
+toursSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: `-__v -passwordChangedAt`
+  });
+  next();
+});
 
 // Document Middleware for the toursSchema, to be executed before saving a document.
 toursSchema.pre(`save`, {}, function(next) {
