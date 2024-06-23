@@ -9,7 +9,12 @@ const toursSchema = new mongoose.Schema(
   {
     // Here we can define our Schema Object
 
-    guides: Array,
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: `User`
+      }
+    ],
 
     startLocation: {
       // GeoJSON
@@ -134,14 +139,14 @@ const toursSchema = new mongoose.Schema(
   }
 );
 
-// This is for embeding documents
-// toursSchema.pre(`save`, async function(next) {
-//   const guidesPromises = this.guides.map(async (id, index, arr) => {
-//     return await User.findById(id);
-//   });
-//   this.guides = await Promise.all(guidesPromises);
-//   next();
-// });
+// When use find() related query we can output guides object in here
+toursSchema.pre(/^find/, function(next) {
+  this.populate({
+    path: 'guides',
+    select: `-__v -passwordChangedAt`
+  });
+  next();
+});
 
 // Define a virtual property for the toursSchema. Virtual properties are fields that Mongoose creates dynamically. They are not stored in the database.
 toursSchema

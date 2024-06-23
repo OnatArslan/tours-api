@@ -46,6 +46,7 @@ exports.getAllTours = async (req, res) => {
 
     // Step 3: Executing Query
     // Build the query with the modified query string. Additional functionalities like sort, paginate can be chained here.
+    // populate(`guides`) is function that get related collection `User` to this query
     let query = Tour.find(JSON.parse(queryStr));
 
     // Step 4: SORTING
@@ -138,6 +139,7 @@ exports.getAllTours = async (req, res) => {
 exports.getTour = async (req, res) => {
   try {
     const id = req.params.id; // This is not neccesary but good for increaseing understand code readabilty
+    // populate(`guides`) is function that get related collection `User` to this query
     const tour = await Tour.findById(id); // findById can take 3 params (id, project, options)
     // const tour = await Tour.findOne({ _id: req.params.id });
     res.status(200).json({
