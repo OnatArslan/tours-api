@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 const globalErrorHandler = require(`./controllers/errorController`);
 
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 // 3) ROUTES
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use(`/api/v1/reviews`, reviewRouter);
 
 // Handling wrong requests - We must place this middleware all routes because
 app.all(`*`, (req, res, next) => {
