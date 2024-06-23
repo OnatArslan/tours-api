@@ -2,10 +2,39 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
 
+const User = require('./userModel');
+
 // Creating a mongoose schema
 const toursSchema = new mongoose.Schema(
   {
     // Here we can define our Schema Object
+
+    guides: Array,
+
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: `Point`,
+        enum: [`Point`]
+      },
+      coordinates: [Number],
+      address: String,
+      description: String
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: `Point`,
+          enum: [`Point`]
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
     name: {
       type: String,
       required: [true, `A tour must have a price`],
@@ -67,8 +96,8 @@ const toursSchema = new mongoose.Schema(
     },
     summary: {
       type: String,
-      trim: true,
-      required: true
+      trim: true
+      // required: true
     },
     description: {
       type: String,
@@ -92,31 +121,7 @@ const toursSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false
-    },
-    startLocation: {
-      // GeoJSON
-      type: {
-        type: String,
-        default: `Point`,
-        enum: [`Point`]
-      },
-      coordinates: [Number],
-      address: String,
-      description: String
-    },
-    locations: [
-      {
-        type: {
-          type: String,
-          default: `Point`,
-          enum: [`Point`]
-        },
-        coordinates: [Number],
-        address: String,
-        description: String,
-        day: Number
-      }
-    ]
+    }
   },
   {
     // Here we can define our Schema Options
@@ -128,6 +133,15 @@ const toursSchema = new mongoose.Schema(
     }
   }
 );
+
+// This is for embeding documents
+// toursSchema.pre(`save`, async function(next) {
+//   const guidesPromises = this.guides.map(async (id, index, arr) => {
+//     return await User.findById(id);
+//   });
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 // Define a virtual property for the toursSchema. Virtual properties are fields that Mongoose creates dynamically. They are not stored in the database.
 toursSchema
