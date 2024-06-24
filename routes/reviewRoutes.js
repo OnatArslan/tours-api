@@ -9,7 +9,11 @@ const router = express.Router({ mergeParams: true }); // mergeParams : true mean
 router
   .route(`/`)
   .get(authController.protect, reviewController.getAllReviews)
-  .post(authController.protect, reviewController.createReview);
+  .post(
+    authController.protect,
+    reviewController.setTourUserId,
+    reviewController.createReview
+  );
 
 router
   .route(`/:id`)
