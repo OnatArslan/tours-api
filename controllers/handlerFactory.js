@@ -197,7 +197,7 @@ exports.getAll = Model => {
         }
       }
       // Execute the query to get the list of tours that match the query criteria
-      const docs = await query;
+      const docs = await query.explain();
       // Count the number of docs returned to include in the response
       const docCount = docs.length;
 

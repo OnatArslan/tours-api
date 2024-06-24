@@ -139,6 +139,11 @@ const toursSchema = new mongoose.Schema(
   }
 );
 
+// Define INDEX for incease performance
+// toursSchema.index({ price: 1 });
+toursSchema.index({ price: 1, ratingsAverage: -1 });
+toursSchema.index({ slug: 1 });
+
 // Define a virtual property 'reviews' on the toursSchema Virtual Populate
 toursSchema.virtual('reviews', {
   ref: 'Review', // Reference the 'Review' model. This tells Mongoose which model to use during population.
