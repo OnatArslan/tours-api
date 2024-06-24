@@ -5,18 +5,6 @@ const authController = require('./../controllers/authController');
 // Import the express module to create a router
 const router = express.Router();
 
-router
-  .route(`/update-password`)
-  .patch(authController.protect, authController.updatePassword);
-
-router
-  .route(`/update-me`)
-  .patch(authController.protect, userController.updateMe);
-
-router
-  .route(`/delete-me`)
-  .delete(authController.protect, userController.deleteMe);
-
 router.route(`/forgot-password`).post(authController.forgotPassword);
 
 router.route(`/reset-password/:token`).patch(authController.resetPassword);
@@ -28,6 +16,17 @@ router.post(`/signup`, authController.signUp);
 // Define a POST route for user login
 // This route listens for POST requests on the `/login` path and uses the signUp method from authController to handle the request.
 router.post(`/login`, authController.login);
+
+// This code add all routes below login required functionalty ------------------------------------------------------------------------------------------------------------------------
+router.use(authController.protect);
+
+router.route(`/update-password`).patch(authController.updatePassword);
+
+router.route(`/update-me`).patch(userController.updateMe);
+
+router.route(`/delete-me`).delete(userController.deleteMe);
+
+router.use(authController.restrictTo(`admin`)); // This code add all routes below admin required functionalty ------------------------------------------------------------------------------------------------------------------------
 
 // Define routes for the base path '/'
 // This chain of methods applies to the base path '/' for different HTTP methods.

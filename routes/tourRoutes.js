@@ -17,8 +17,12 @@ router.use(`/:tourId/reviews`, reviewRouter); // This code is same as in app.js 
 // Route for getting all tours and creating a new tour
 router
   .route('/')
-  .get(authController.protect, tourController.getAllTours) // GET request to retrieve all tours, with authentication
-  .post(tourController.createTour); // POST request to create a new tour
+  .get(tourController.getAllTours) // GET request to retrieve all tours, with authentication
+  .post(
+    authController.protect,
+    authController.restrictTo(`admin`, `lead-guide`),
+    tourController.createTour
+  ); // POST request to create a new tour
 
 // Route for getting top 5 cheap tours
 router
@@ -29,13 +33,24 @@ router
 router.route('/tour-stats').get(tourController.getTourStats); // GET request to retrieve tour statistics
 
 // Route for getting monthly plan for a given year
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan); // GET request to retrieve monthly plan for tours
+// GET request to retrieve monthly plan for tours
+router
+  .route('/monthly-plan/:year')
+  .get(
+    authController.protect,
+    authController.restrictTo(`admin`, `lead-guide`),
+    tourController.getMonthlyPlan
+  );
 
 // Routes for specific tour identified by its ID
 router
   .route('/:id')
   .get(tourController.getTour) // GET request to retrieve a single tour by its ID
-  .patch(tourController.updateTour) // PATCH request to update a tour by its ID
+  .patch(
+    authController.protect,
+    authController.restrictTo(`admin`, `lead-guide`),
+    tourController.updateTour
+  ) // PATCH request to update a tour by its ID
   .delete(
     authController.protect, // Middleware to protect the route, ensuring only authenticated users can access
     authController.restrictTo('admin', 'lead-guide'), // Middleware to restrict access to certain roles
