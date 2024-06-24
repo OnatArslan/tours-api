@@ -1,5 +1,5 @@
 const Tour = require('./../models/tourModel');
-
+const handlerFactory = require('./handlerFactory');
 // This middleware function is designed to modify the request query parameters for a specific route.
 // It's typically used to create a shortcut or alias for a complex query, making it easier for clients to request popular data sets.
 exports.aliasTopTours = async (req, res, next) => {
@@ -202,30 +202,32 @@ exports.updateTour = async (req, res) => {
   }
 };
 
-exports.deleteTour = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const tour = await Tour.findByIdAndDelete(id);
+exports.deleteTour = handlerFactory.deleteOne(Tour);
 
-    if (!tour) {
-      return res.status(404).json({
-        status: 'fail',
-        message: 'No tour found with that ID'
-      });
-    }
+// exports.deleteTour = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     const tour = await Tour.findByIdAndDelete(id);
 
-    res.status(204).json({
-      // status(204) won`t show message or data if this is important use status(200)
-      status: 'success',
-      data: null
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message // It's often helpful to return the error message for debugging purposes.
-    });
-  }
-};
+//     if (!tour) {
+//       return res.status(404).json({
+//         status: 'fail',
+//         message: 'No tour found with that ID'
+//       });
+//     }
+
+//     res.status(204).json({
+//       // status(204) won`t show message or data if this is important use status(200)
+//       status: 'success',
+//       data: null
+//     });
+//   } catch (err) {
+//     res.status(400).json({
+//       status: 'fail',
+//       message: err.message // It's often helpful to return the error message for debugging purposes.
+//     });
+//   }
+// };
 
 // Aggregation Pipeline
 exports.getTourStats = async (req, res) => {

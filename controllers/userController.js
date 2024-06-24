@@ -1,6 +1,7 @@
 const User = require('./../models/userModel');
 const AppError = require(`./../utils/appError`);
 
+const handlerFactory = require(`./handlerFactory`);
 // Utility function to filter object properties based on allowed fields
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -105,9 +106,4 @@ exports.updateUser = (req, res) => {
     message: 'This route is not yet defineddddd!'
   });
 };
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!'
-  });
-};
+exports.deleteUser = handlerFactory.deleteOne(User);

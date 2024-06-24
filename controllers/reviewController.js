@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
+// Import models
 const Review = require(`./../models/reviewModel`);
 const Tour = require(`./../models/tourModel`);
+// Import global handler
+const handlerFactory = require(`./handlerFactory`);
 
 // Asynchronously defines a function to create a review
 exports.createReview = async (req, res, next) => {
@@ -39,16 +42,26 @@ exports.createReview = async (req, res, next) => {
 // Asynchronously defines a function to get all reviews
 exports.getAllReviews = async (req, res, next) => {
   try {
-    // Fetches all reviews from the database
-    const reviews = await Review.find();
-    // Uncomment the lines below if you want to include details of the user and tour associated with each review
-    // .populate('user', 'name') // Populates the 'user' field in each review with user details (e.g., name)
-    // .populate('tour', 'name'); // Populates the 'tour' field in each review with tour details (e.g., name)
+    let reviews;
+    if (req.params.tourId) {
+      // Fetches all reviews from the database
+      reviews = await Review.find({
+        tour: req.params.tourId
+      }); // We can define populate() as well
+
+      // Uncomment the lines below if you want to include details of the user and tour associated with each review
+      // .populate('user', 'name') // Populates the 'user' field in each review with user details (e.g., name)
+      // .populate('tour', 'name'); // Populates the 'tour' field in each review with tour details (e.g., name)
+    } else {
+      reviews = await Review.find();
+    }
 
     // If the operation is successful, responds with a 200 status code and the reviews data
+    const count = reviews.length;
     res.status(200).json({
       status: 'success',
       data: {
+        count: count,
         reviews: reviews // The fetched reviews from the database
       }
     });
@@ -61,3 +74,5 @@ exports.getAllReviews = async (req, res, next) => {
     });
   }
 };
+
+exports.deleteReview = handlerFactory.deleteOne(Review);
