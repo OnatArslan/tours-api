@@ -6,7 +6,7 @@ const router = express.Router({ mergeParams: true }); // mergeParams : true mean
 
 // POST /tour/23232/reviews mergeParams
 
-app.use(authController.protect);
+router.use(authController.protect);
 
 router
   .route(`/`)
