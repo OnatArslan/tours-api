@@ -2,7 +2,9 @@ const express = require('express');
 const reviewController = require('./../controllers/reviewController');
 const authController = require(`./../controllers/authController`);
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true }); // mergeParams : true mean that no matter what this router catch the request
+
+// POST /tour/23232/reviews mergeParams
 
 router
   .route(`/`)

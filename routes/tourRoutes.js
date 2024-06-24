@@ -1,11 +1,18 @@
 // Importing necessary modules
 const express = require('express'); // Express framework to handle routes
+// Controllers
 const tourController = require('./../controllers/tourController'); // Controller for tour-related operations
 const authController = require('./../controllers/authController'); // Controller for authentication and authorization
 const reviewController = require('./../controllers/reviewController');
+// Routers for nested routes
+const reviewRouter = require('./../routes/reviewRoutes');
 
 // Creating a new router object to handle routes for tours
 const router = express.Router();
+
+// Nested route with express (Advanced)
+router.use(`/:tourId/reviews`, reviewRouter); // This code is same as in app.js file
+// app.use('/api/v1/tours', tourRouter); This is in app.js file // Basicly we use reviewRouter in tour routes if request be like /:tourId/reviews
 
 // Route for getting all tours and creating a new tour
 router
@@ -33,15 +40,6 @@ router
     authController.protect, // Middleware to protect the route, ensuring only authenticated users can access
     authController.restrictTo('admin', 'lead-guide'), // Middleware to restrict access to certain roles
     tourController.deleteTour // DELETE request to delete a tour by its ID
-  );
-
-// Nested route
-router
-  .route(`/:tourId/reviews`)
-  .post(
-    authController.protect,
-    authController.restrictTo(`user`),
-    reviewController.createReview
   );
 
 // Exporting the router to be used in the main application file
