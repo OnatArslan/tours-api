@@ -70,6 +70,8 @@ exports.deleteMe = async (req, res, next) => {
   }
 };
 
+// exports.getMe = async(req,res,next)
+
 exports.getAllUsers = async (req, res, next) => {
   try {
     const user = await User.find();
@@ -100,10 +102,6 @@ exports.createUser = (req, res) => {
     message: 'This route is not yet defined!'
   });
 };
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defineddddd!'
-  });
-};
+// Do not updae password with it
+exports.updateUser = handlerFactory.updateOne(User);
 exports.deleteUser = handlerFactory.deleteOne(User);

@@ -24,3 +24,31 @@ exports.deleteOne = Model => {
     }
   };
 };
+
+exports.updateOne = Model => {
+  return async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updatedDoc = await Model.findByIdAndUpdate(id, req.body, {
+        runValidators: true,
+        new: true
+      });
+      // This is normal query system for mongoose but upper code is more elegant
+      // const updatedModel = await Tour.findOneAndUpdate({ _id: id }, req.body, {
+      //   runValidators: true,
+      //   new: true
+      // });
+      res.status(200).json({
+        status: 'success',
+        data: {
+          doc: updatedDoc
+        }
+      });
+    } catch (err) {
+      res.status(400).json({
+        status: `fail`,
+        message: err
+      });
+    }
+  };
+};

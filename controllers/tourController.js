@@ -175,35 +175,35 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const updatedTour = await Tour.findByIdAndUpdate(id, req.body, {
-      runValidators: true,
-      new: true
-    });
-    // This is normal query system for mongoose but upper code is more elegant
-    // const updatedTour = await Tour.findOneAndUpdate({ _id: id }, req.body, {
-    //   runValidators: true,
-    //   new: true
-    // });
+exports.updateTour = handlerFactory.updateOne(Tour);
+// exports.updateTour = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     const updatedTour = await Tour.findByIdAndUpdate(id, req.body, {
+//       runValidators: true,
+//       new: true
+//     });
+//     // This is normal query system for mongoose but upper code is more elegant
+//     // const updatedTour = await Tour.findOneAndUpdate({ _id: id }, req.body, {
+//     //   runValidators: true,
+//     //   new: true
+//     // });
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour: updatedTour
-      }
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: `fail`,
-      message: err
-    });
-  }
-};
+//     res.status(200).json({
+//       status: 'success',
+//       data: {
+//         tour: updatedTour
+//       }
+//     });
+//   } catch (err) {
+//     res.status(400).json({
+//       status: `fail`,
+//       message: err
+//     });
+//   }
+// };
 
 exports.deleteTour = handlerFactory.deleteOne(Tour);
-
 // exports.deleteTour = async (req, res) => {
 //   try {
 //     const id = req.params.id;
