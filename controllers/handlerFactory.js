@@ -47,7 +47,7 @@ exports.updateOne = Model => {
     } catch (err) {
       res.status(400).json({
         status: `fail`,
-        message: err
+        message: err.message
       });
     }
   };
@@ -61,7 +61,7 @@ exports.createOne = Model => {
       res.status(201).json({
         status: 'success',
         data: {
-          message: `${doc} created succesfuly`,
+          message: `doc created succesfuly`,
           doc: doc
         }
       });
@@ -197,7 +197,7 @@ exports.getAll = Model => {
         }
       }
       // Execute the query to get the list of tours that match the query criteria
-      const docs = await query.explain();
+      const docs = await query;
       // Count the number of docs returned to include in the response
       const docCount = docs.length;
 
