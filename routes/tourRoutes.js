@@ -42,6 +42,10 @@ router
     tourController.getMonthlyPlan
   );
 
+router
+  .route(`/tours-within/:distance/center/:latlng/unit/:unit`)
+  .get(tourController.getToursWithin);
+
 // Routes for specific tour identified by its ID
 router
   .route('/:id')

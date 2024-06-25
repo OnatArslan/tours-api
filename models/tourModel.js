@@ -144,6 +144,7 @@ const toursSchema = new mongoose.Schema(
 // toursSchema.index({ price: 1 });
 toursSchema.index({ price: 1, ratingsAverage: -1 });
 toursSchema.index({ slug: 1 });
+toursSchema.index({ startLocation: `2dsphere` });
 
 // Define a virtual property 'reviews' on the toursSchema Virtual Populate
 toursSchema.virtual('reviews', {

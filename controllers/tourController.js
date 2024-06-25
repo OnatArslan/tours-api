@@ -1,3 +1,4 @@
+const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModel');
 const handlerFactory = require('./handlerFactory');
 // This middleware function is designed to modify the request query parameters for a specific route.
@@ -331,6 +332,39 @@ exports.getMonthlyPlan = async (req, res) => {
     res.status(400).json({
       status: 'fail',
       message: err.message // It's often helpful to return the error message for debugging purposes.
+    });
+  }
+};
+
+exports.getToursWithin = async (req, res, next) => {
+  try {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(`,`);
+    const radius = unit === `mi` ? distance / 3963.2 : distance / 6378.1;
+    if (!lat || !lng) {
+      return next(
+        new AppError(`Please provide lat and lng format like lat,lng`, 400)
+      );
+    }
+    console.log(distance, lat, lng, unit);
+    const tours = await Tour.find({
+      startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } }
+    });
+    if (!tours) {
+      return next(new AppError(`Can not find any tour with given coordinates`));
+    }
+    res.status(200).json({
+      status: `success`,
+      results: tours.length,
+      data: {
+        data: tours
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      status: `fail`,
+      message: err.message
     });
   }
 };
