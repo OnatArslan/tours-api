@@ -46,6 +46,8 @@ router
   .route(`/tours-within/:distance/center/:latlng/unit/:unit`)
   .get(tourController.getToursWithin);
 
+router.route(`/distances/:latlng/unit/:unit`).get(tourController.getDistance);
+
 // Routes for specific tour identified by its ID
 router
   .route('/:id')

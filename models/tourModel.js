@@ -220,21 +220,21 @@ toursSchema.pre(/^find/, function(next) {
   next();
 });
 
-// AGGREGATION MIDDLEWARE
-// Attach a pre-aggregate middleware to the toursSchema. This middleware will run before any aggregation operation.
-toursSchema.pre('aggregate', function(next) {
-  // This middleware intercepts the aggregation pipeline and modifies it by adding a $match stage
-  // at the beginning. The $match stage { secretTour: { $ne: true } } filters out documents where
-  // 'secretTour' is true, similar to the query middleware but for aggregation operations.
+// // AGGREGATION MIDDLEWARE
+// // Attach a pre-aggregate middleware to the toursSchema. This middleware will run before any aggregation operation.
+// toursSchema.pre('aggregate', function(next) {
+//   // This middleware intercepts the aggregation pipeline and modifies it by adding a $match stage
+//   // at the beginning. The $match stage { secretTour: { $ne: true } } filters out documents where
+//   // 'secretTour' is true, similar to the query middleware but for aggregation operations.
 
-  // `this.pipeline()` returns the array of stages in the current aggregation pipeline. We use
-  // `unshift()` to add a new $match stage at the beginning of this pipeline. This ensures that
-  // the filtering is applied before any other aggregation stages are processed.
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   // `this.pipeline()` returns the array of stages in the current aggregation pipeline. We use
+//   // `unshift()` to add a new $match stage at the beginning of this pipeline. This ensures that
+//   // the filtering is applied before any other aggregation stages are processed.
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 
-  // Call `next()` to continue with the execution of the aggregation pipeline after this middleware.
-  next();
-});
+//   // Call `next()` to continue with the execution of the aggregation pipeline after this middleware.
+//   next();
+// });
 
 // Creating a model based on Tours schema
 const Tour = mongoose.model(`Tour`, toursSchema);
