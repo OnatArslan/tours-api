@@ -11,6 +11,9 @@ const globalErrorHandler = require(`./controllers/errorController`);
 
 const app = express();
 
+// We tell express which view engine we using
+app.set(`view engine`, `pug`);
+
 // 1) GLOBAL MIDDLEWARES
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
