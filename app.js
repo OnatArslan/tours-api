@@ -14,9 +14,10 @@ const globalErrorHandler = require(`./controllers/errorController`);
 const app = express();
 
 // We tell express which view engine we using
-app.set(`view engine`, `pug`);
 
-app.set(`views`, path.join(__dirname), `views`);
+app.set('view engine', 'pug');
+
+app.set(`views`, path.join(__dirname, `views`));
 
 // 1) GLOBAL MIDDLEWARES
 app.use(express.static(path.join(__dirname, `public`)));
