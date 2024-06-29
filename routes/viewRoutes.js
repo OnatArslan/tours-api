@@ -1,24 +1,12 @@
 const express = require('express');
 
+// Import viewController
+const viewController = require(`./../controllers/viewController`);
+
 const router = express.Router();
 
-router.get(`/`, (req, res, next) => {
-  res.status(200).render(`base`, {
-    tour: 'The forest hiker',
-    user: 'Jonas'
-  });
-});
+router.get(`/`, viewController.getOverview);
 
-router.get(`/overview`, (req, res, next) => {
-  res.status(200).render(`overview`, {
-    title: `All Tours`
-  });
-});
-
-router.get(`/tour`, (req, res, next) => {
-  res.status(200).render(`tour`, {
-    title: `The Forest Hiker`
-  });
-});
+router.get(`/tour`, viewController.getTour);
 
 module.exports = router;
