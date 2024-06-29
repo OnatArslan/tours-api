@@ -50,7 +50,7 @@ app.get(`/`, (req, res, next) => {
 });
 
 app.get(`/overview`, (req, res, next) => {
-  res.status(200).render(`overwiev`, {
+  res.status(200).render(`overview`, {
     title: `All Tours`
   });
 });
