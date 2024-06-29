@@ -5,9 +5,12 @@ const rateLimit = require('express-rate-limit');
 
 const path = require(`path`);
 
+// Import raouters
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+// Web router
+const viewRouter = require(`./routes/viewRoutes`);
 
 const globalErrorHandler = require(`./controllers/errorController`);
 
@@ -41,29 +44,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// 3) ROUTES
-app.get(`/`, (req, res, next) => {
-  res.status(200).render(`base`, {
-    tour: 'The forest hiker',
-    user: 'Jonas'
-  });
-});
-
-app.get(`/overview`, (req, res, next) => {
-  res.status(200).render(`overview`, {
-    title: `All Tours`
-  });
-});
-
-app.get(`/tour`, (req, res, next) => {
-  res.status(200).render(`tour`, {
-    title: `The Forest Hiker`
-  });
-});
-
+// 3) using our routers as a middleware
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use(`/api/v1/reviews`, reviewRouter);
+// Web router middleware
+app.use(`/`, viewRouter);
 
 // Handling wrong requests - We must place this middleware all routes because
 app.all(`*`, (req, res, next) => {
