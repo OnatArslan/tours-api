@@ -53,7 +53,7 @@ app.use(`/`, viewRouter);
 
 // Handling wrong requests - We must place this middleware all routes because
 app.all(`*`, (req, res, next) => {
-  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+  // const err = new Error(`Can't find ${req.originalUrl} on this server!`);
   // console.log(err.stack); // err.stack show us where the error happened
 
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404)); // When we use a error handler middleware we must use next() with error parameter
